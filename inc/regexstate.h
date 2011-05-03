@@ -8,11 +8,11 @@
 
 class RegExState{
 private:
-	std::multimap<char, RegExState*> m_Transition;	
+	
 	std::set<RegExState*> m_NFAStates;
 	
 public:
-
+	std::multimap<char, RegExState*> m_Transition;	
 	int m_nStateID;
 	bool m_bAcceptingState;
 	bool m_Marked;

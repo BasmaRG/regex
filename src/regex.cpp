@@ -253,17 +253,18 @@ void RegEx::EpsilonClosure(std::set<RegExState*> startSet, std::set<RegExState*>
 	}
 }
 
-void RegEx::Move(char chInput, std::set<RegExState*> DFAState, std::set<RegExState*> &Result) {
+void RegEx::Move(char chInput, std::set<RegExState*> NFAState, std::set<RegExState*> &Result) {
 	//printf ( "Current Input Symbol = %c\n", chInput );
 
 	Result.clear();
 	std::set<RegExState*>::iterator iter;
-	for(iter = DFAState.begin(); iter != DFAState.end(); ++iter) {
+	for(iter = NFAState.begin(); iter != NFAState.end(); ++iter) {
 		std::vector<RegExState*> States;
 		//printf ( "Checking Transition from [%d] of [%c]\n", (*iter)->m_nStateID, chInput);
 		(*iter)->GetTransition(chInput, States);
-		for(int index = 0; index < (int)States.size(); ++index)
+		for(int index = 0; index < (int)States.size(); ++index){
 			Result.insert(States[index]);
+		}
 	}
 }
 
@@ -284,12 +285,12 @@ void RegEx::ConvertNFAtoDFA() {
 	NFAStartStateSet.insert(m_NFATable[0]);
 
 	EpsilonClosure(NFAStartStateSet, DFAStartStateSet);
-	printf ( "e-CLOSURE({ %d }) = { ", m_NFATable[0]->m_nStateID);
-	std::set<RegExState*>::iterator itr;
-	for ( itr = DFAStartStateSet.begin(); itr != DFAStartStateSet.end(); ++itr ) {
-		printf ( " %d ", (*itr)->m_nStateID);
-	}
-	printf ( " }\n");
+	//printf ( "e-CLOSURE({ %d }) = { ", m_NFATable[0]->m_nStateID);
+	//std::set<RegExState*>::iterator itr;
+	//for ( itr = DFAStartStateSet.begin(); itr != DFAStartStateSet.end(); ++itr ) {
+	//	printf ( " %d ", (*itr)->m_nStateID);
+	//}
+	//printf ( " }\n");
 
 	RegExState *DFAStartState = new RegExState(DFAStartStateSet, ++m_nNextStateID);
 
@@ -298,26 +299,39 @@ void RegEx::ConvertNFAtoDFA() {
 	unmarkedStates.push_back(DFAStartState);
 	while(!unmarkedStates.empty()) {
 
-		RegExState* processingDFAState = unmarkedStates[unmarkedStates.size()-1];
+		RegExState* CurDFAState = unmarkedStates[unmarkedStates.size()-1];
 		unmarkedStates.pop_back();
 
 		std::set<char>::iterator iter;
 		for(iter=m_InputSet.begin(); iter!=m_InputSet.end(); ++iter) {
 			std::set<RegExState*> MoveRes, EpsilonClosureRes;
-			Move(*iter, processingDFAState->GetNFAState(), MoveRes);
+			Move(*iter, CurDFAState->GetNFAState(), MoveRes);
+
+	//		printf ( "move( { ");
+	//		std::set<RegExState*>::iterator A;
+	//		for ( A = CurDFAState->GetNFAState().begin(); A != CurDFAState->GetNFAState().end(); ++A ) {
+	//			printf ( "%d ", (*A)->m_nStateID );
+	//		}
+	//		printf ( "} , %c ) = {", *iter);
+	//		std::set<RegExState*>::iterator B;
+	//		for ( B = MoveRes.begin(); B != MoveRes.end(); ++B ) {
+	//			printf ( "%d ", (*B)->m_nStateID);
+	//		}
+	//		printf ( " }\n");
+
 			EpsilonClosure(MoveRes, EpsilonClosureRes);
 
 			std::set<RegExState*>::iterator MoveResItr;
 			std::set<RegExState*>::iterator EpsilonClosureResItr;
-			printf ( "e-CLOSURE({");
-			for (MoveResItr = MoveRes.begin(); MoveResItr != MoveRes.end(); ++MoveResItr) {
-				printf ( " %d ",(*MoveResItr)->m_nStateID);
-			}
-			printf ( "}) = { ");
-			for (EpsilonClosureResItr = EpsilonClosureRes.begin(); EpsilonClosureResItr != EpsilonClosureRes.end(); ++EpsilonClosureResItr) {
-				printf ( " %d ",(*EpsilonClosureResItr)->m_nStateID);
-			}
-			printf ( "}\n");
+	//		printf ( "e-CLOSURE({");
+	//		for (MoveResItr = MoveRes.begin(); MoveResItr != MoveRes.end(); ++MoveResItr) {
+	//			printf ( " %d ",(*MoveResItr)->m_nStateID);
+	//		}
+	//		printf ( "}) = { ");
+	//		for (EpsilonClosureResItr = EpsilonClosureRes.begin(); EpsilonClosureResItr != EpsilonClosureRes.end(); ++EpsilonClosureResItr) {
+	//			printf ( " %d ",(*EpsilonClosureResItr)->m_nStateID);
+	//		}
+	//		printf ( "}\n");
 
 			bool bFound = false;
 			RegExState *s   = NULL;
@@ -332,9 +346,9 @@ void RegEx::ConvertNFAtoDFA() {
 				RegExState* U = new RegExState(EpsilonClosureRes, ++m_nNextStateID);
 				unmarkedStates.push_back(U);
 				m_DFATable.push_back(U);                                
-				processingDFAState->AddTransition(*iter, U);
+				CurDFAState->AddTransition(*iter, U);
 			} else {
-				processingDFAState->AddTransition(*iter, s);
+				CurDFAState->AddTransition(*iter, s);
 			}
 		}
 	}
@@ -347,10 +361,8 @@ void RegEx::ReduceDFA() {
 			DeadEndSet.insert(m_DFATable[i]);
 		}
 	}
-
 	if(DeadEndSet.empty())
 		return;
-
 	std::set<RegExState*>::iterator iter;
 	for(iter = DeadEndSet.begin(); iter != DeadEndSet.end(); ++iter) {
 		for(int i = 0; i < (int)m_DFATable.size(); ++i)
@@ -377,11 +389,42 @@ bool RegEx::SetRegEx(std::string strRegEx) {
 	m_NFATable[m_NFATable.size() - 1 ]->m_bAcceptingState = true;
 
 	ConvertNFAtoDFA();
-	ReduceDFA();
-
+	{
 	std::deque<RegExState*>::iterator itr;
 	for ( itr = m_DFATable.begin(); itr != m_DFATable.end(); ++itr){
-		//printf ( "DFA STATES = [%d]\n", (*itr)->m_nStateID);
+		std::multimap<char, RegExState*>::iterator A;
+		for ( A = (*itr)->m_Transition.begin(); A != (*itr)->m_Transition.end(); ++A) {
+			char ch = A->first;
+			RegExState *S = A->second;
+			printf ( "[%d] --- %c -----> ", (*itr)->m_nStateID, ch);
+			if ( S->m_bAcceptingState == true ) {
+				printf ( " - [[%d]]\n", S->m_nStateID);
+			} else {
+				printf ( " - [%d]\n", S->m_nStateID);
+			}
+
+		}	
+	}
+	}
+	printf ( "===========================\n");
+
+	ReduceDFA();
+	{
+	std::deque<RegExState*>::iterator itr;
+	for ( itr = m_DFATable.begin(); itr != m_DFATable.end(); ++itr){
+		std::multimap<char, RegExState*>::iterator A;
+		for ( A = (*itr)->m_Transition.begin(); A != (*itr)->m_Transition.end(); ++A) {
+			char ch = A->first;
+			RegExState *S = A->second;
+			printf ( "[%d] --- %c -----> ", (*itr)->m_nStateID, ch);
+			if ( S->m_bAcceptingState == true ) {
+				printf ( " - [[%d]]\n", S->m_nStateID);
+			} else {
+				printf ( " - [%d]\n", S->m_nStateID);
+			}
+
+		}	
+	}
 	}
 	return true;
 }

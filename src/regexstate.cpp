@@ -60,7 +60,7 @@ bool RegExState::IsDeadEnd() {
 
 RegExState& RegExState::operator=(const RegExState& other) { 
 	this->m_Transition	= other.m_Transition; 
-	this->m_nStateID		= other.m_nStateID;
+	this->m_nStateID	= other.m_nStateID;
 	this->m_NFAStates	= other.m_NFAStates;
 	return *this;
 }
