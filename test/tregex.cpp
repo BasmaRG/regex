@@ -7,7 +7,7 @@ int main( int argc, char **argv ) {
 	//myRegEx.SetRegEx("ab*c|d");
 	//myRegEx.SetRegEx("a|b");
 	//myRegEx.SetRegEx("((a|b)|cd)");	
-	myRegEx.SetRegEx("(a|b)*a");	
+	myRegEx.SetRegEx("D*\\.D|D\\.D*");	
 	std::string pattern;
 	int position;
 	myRegEx.FindFirst("Hello How are you aaaaaab", position, pattern);

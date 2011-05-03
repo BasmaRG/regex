@@ -5,9 +5,11 @@ RegExState::RegExState(std::set<RegExState*> NFAState, int nID) {
 	m_nStateID = nID;
 	m_bAcceptingState = false;
 	std::set<RegExState*>::iterator iter;
-	for(iter=NFAState.begin(); iter!=NFAState.end(); ++iter)
-		if((*iter)->m_bAcceptingState)
+	for(iter = NFAState.begin(); iter != NFAState.end(); ++iter) {
+		if((*iter)->m_bAcceptingState) {
 			m_bAcceptingState = true;
+		}
+	}
 }
 RegExState::RegExState(const RegExState &other){ 
 	*this = other;
@@ -33,6 +35,7 @@ void RegExState::GetTransition(char inputCh, std::vector<RegExState*> &States) {
 	std::multimap<char, RegExState*>::iterator iter;
 	for(iter = m_Transition.lower_bound(inputCh); iter != m_Transition.upper_bound(inputCh); ++iter) {
 		RegExState *pState = iter->second;
+		//printf ( "Adding State %d\n", pState->m_nStateID);
 		States.push_back(pState);
 	}
 }

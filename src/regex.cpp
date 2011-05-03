@@ -69,7 +69,7 @@ bool RegEx::Concatenate() {
 	std::deque<RegExState*>::reverse_iterator pLeftItr = LeftExpr.rbegin();
 	std::deque<RegExState*>::iterator pRightItr = RightExpr.begin();        
 
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*pLeftItr))->m_nStateID, ((*pRightItr))->m_nStateID);
+	////printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*pLeftItr))->m_nStateID, ((*pRightItr))->m_nStateID);
 	((*pLeftItr))->AddTransition(EPSILON, ((*pRightItr)));
 
 	LeftExpr.insert(LeftExpr.end(), RightExpr.begin(), RightExpr.end());
@@ -83,7 +83,7 @@ void RegEx::PushOnCharacterStack(char chInput) {
 	RegExState *s0 = new RegExState(++m_nNextStateID);
 	RegExState *s1 = new RegExState(++m_nNextStateID);
 
-	printf ( "Transition from [%d] to [%d] on [%c]\n", s0->m_nStateID, s1->m_nStateID, chInput);
+	////printf ( "Transition from [%d] to [%d] on [%c]\n", s0->m_nStateID, s1->m_nStateID, chInput);
 	s0->AddTransition(chInput, s1);
 
 	std::deque<RegExState*>  NewExpr;
@@ -106,13 +106,13 @@ bool RegEx::ClosureOptional() {
 	std::deque<RegExState*>::reverse_iterator rItr = PrevExpr.rbegin();
 	std::deque<RegExState*>::iterator Itr = PrevExpr.begin();
 
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, RightExpr->m_nStateID);
+	////printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, RightExpr->m_nStateID);
 	LeftExpr->AddTransition(EPSILON, RightExpr);
 
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*Itr))->m_nStateID);
+	////printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*Itr))->m_nStateID);
 	LeftExpr->AddTransition(EPSILON, ((*Itr)));
 
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, RightExpr->m_nStateID);
+	////printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, RightExpr->m_nStateID);
 	(*(rItr))->AddTransition(EPSILON, RightExpr);
 
 	PrevExpr.push_front( LeftExpr );
@@ -134,13 +134,13 @@ bool RegEx::ClosurePlus() {
 	std::deque<RegExState*>::reverse_iterator rItr = PrevExpr.rbegin();
 	std::deque<RegExState*>::iterator Itr = PrevExpr.begin();
 
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*Itr))->m_nStateID);
+	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*Itr))->m_nStateID);
 	LeftExpr->AddTransition(EPSILON, ((*Itr)));
 
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, RightExpr->m_nStateID);
+	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, RightExpr->m_nStateID);
 	(*(rItr))->AddTransition(EPSILON, RightExpr);
 
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, ((*Itr))->m_nStateID);
+	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, ((*Itr))->m_nStateID);
 	(*(rItr))->AddTransition(EPSILON, ((*Itr)));
 
 	PrevExpr.push_front( LeftExpr );
@@ -162,16 +162,16 @@ bool RegEx::Closure() {
 	std::deque<RegExState*>::reverse_iterator rItr = PrevExpr.rbegin();
 	std::deque<RegExState*>::iterator Itr = PrevExpr.begin();
 
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, RightExpr->m_nStateID);
+	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, RightExpr->m_nStateID);
 	LeftExpr->AddTransition(EPSILON, RightExpr);
 
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*Itr))->m_nStateID);
+	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*Itr))->m_nStateID);
 	LeftExpr->AddTransition(EPSILON, ((*Itr)));
 
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, RightExpr->m_nStateID);
+	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, RightExpr->m_nStateID);
 	(*(rItr))->AddTransition(EPSILON, RightExpr);
 
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, ((*Itr))->m_nStateID);
+	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, ((*Itr))->m_nStateID);
 	(*(rItr))->AddTransition(EPSILON, ((*Itr)));
 
 	PrevExpr.push_front( LeftExpr );
@@ -186,7 +186,7 @@ bool RegEx::Or() {
 
 	std::deque<RegExState*>  UpperExpr, LowerExpr;
 
-	printf ( "Size of Stack = %d\n", m_CharacterClassStack.size());
+	//printf ( "Size of Stack = %d\n", m_CharacterClassStack.size());
 
 	if(!PopNFA(LowerExpr) || !PopNFA(UpperExpr))
 		return false;
@@ -195,19 +195,19 @@ bool RegEx::Or() {
 	RegExState *RightExpr	= new RegExState(++m_nNextStateID);
 
 	std::deque<RegExState*>::iterator UBeginItr = UpperExpr.begin();
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*UBeginItr))->m_nStateID);
+	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*UBeginItr))->m_nStateID);
 	LeftExpr->AddTransition(EPSILON, ((*UBeginItr)));
 
 	std::deque<RegExState*>::iterator LBeginItr = LowerExpr.begin();
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*LBeginItr))->m_nStateID);
+	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*LBeginItr))->m_nStateID);
 	LeftExpr->AddTransition(EPSILON, ((*LBeginItr)));
 
 	std::deque<RegExState*>::reverse_iterator URIterator = UpperExpr.rbegin();
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*URIterator))->m_nStateID, RightExpr->m_nStateID);
+	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*URIterator))->m_nStateID, RightExpr->m_nStateID);
 	((*URIterator))->AddTransition(EPSILON, RightExpr);
 
 	std::deque<RegExState*>::reverse_iterator LRIterator = LowerExpr.rbegin();
-	printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*LRIterator))->m_nStateID, RightExpr->m_nStateID);
+	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*LRIterator))->m_nStateID, RightExpr->m_nStateID);
 	((*LRIterator))->AddTransition(EPSILON, RightExpr);
 
 	LowerExpr.push_back(RightExpr);
@@ -218,43 +218,52 @@ bool RegEx::Or() {
 
 	std::deque<RegExState*>::iterator itr;
 	for ( itr = UpperExpr.begin(); itr != UpperExpr.end(); ++itr) {
-		printf ( "%d - ", (*itr)->m_nStateID);
+		//printf ( "%d - ", (*itr)->m_nStateID);
 	}
-	printf ( "\n" );
+	//printf ( "\n" );
 	return true;
 }
-void RegEx::EpsilonClosure(std::set<RegExState*> T, std::set<RegExState*> &Res) {
-	Res.clear();	
-	Res = T;
-	std::stack<RegExState*> unprocessedStack;
+void RegEx::EpsilonClosure(std::set<RegExState*> startSet, std::set<RegExState*> &result) {
+	std::stack<RegExState*> UnTestedStates;	
+
+	result.clear();	
+	result = startSet; // Each State is epsilon closure to itself.
+
 	std::set<RegExState*>::iterator iter;
-	for(iter=T.begin(); iter!=T.end(); ++iter)
-		unprocessedStack.push(*iter);
-	while(!unprocessedStack.empty()) {
-		RegExState* t = unprocessedStack.top();
-		unprocessedStack.pop();
+	for(iter = startSet.begin(); iter != startSet.end(); ++iter) {
+		UnTestedStates.push(*iter);
+	}
+
+	while(!UnTestedStates.empty()) {
+		RegExState* curState = UnTestedStates.top();
+		//printf ( "Current State = %d\n", curState->m_nStateID);
+		UnTestedStates.pop();
+
 		std::vector<RegExState*> epsilonStates;
-		t->GetTransition(EPSILON, epsilonStates);
+		curState->GetTransition(EPSILON, epsilonStates);
 
 		for(int i = 0; i < (int)epsilonStates.size(); ++i) {
-			RegExState* u = epsilonStates[i];
-			if(Res.find(u) == Res.end()) {
-				Res.insert(u);
-				unprocessedStack.push(u);
+			RegExState* epsilonState = epsilonStates[i];
+			if(result.find(epsilonState) == result.end()) {
+				epsilonState->m_Marked = false;
+				result.insert(epsilonState);
+				UnTestedStates.push(epsilonState);
 			}
 		}
 	}
 }
 
-void RegEx::Move(char chInput, std::set<RegExState*> T, std::set<RegExState*> &Res) {
-	Res.clear();
+void RegEx::Move(char chInput, std::set<RegExState*> DFAState, std::set<RegExState*> &Result) {
+	//printf ( "Current Input Symbol = %c\n", chInput );
+
+	Result.clear();
 	std::set<RegExState*>::iterator iter;
-	for(iter = T.begin(); iter != T.end(); ++iter) {
-		RegExState* pState = *iter;
+	for(iter = DFAState.begin(); iter != DFAState.end(); ++iter) {
 		std::vector<RegExState*> States;
-		pState->GetTransition(chInput, States);
-		for(int i = 0; i < (int)States.size(); ++i)
-			Res.insert(States[i]);
+		//printf ( "Checking Transition from [%d] of [%c]\n", (*iter)->m_nStateID, chInput);
+		(*iter)->GetTransition(chInput, States);
+		for(int index = 0; index < (int)States.size(); ++index)
+			Result.insert(States[index]);
 	}
 }
 
@@ -275,6 +284,12 @@ void RegEx::ConvertNFAtoDFA() {
 	NFAStartStateSet.insert(m_NFATable[0]);
 
 	EpsilonClosure(NFAStartStateSet, DFAStartStateSet);
+	printf ( "e-CLOSURE({ %d }) = { ", m_NFATable[0]->m_nStateID);
+	std::set<RegExState*>::iterator itr;
+	for ( itr = DFAStartStateSet.begin(); itr != DFAStartStateSet.end(); ++itr ) {
+		printf ( " %d ", (*itr)->m_nStateID);
+	}
+	printf ( " }\n");
 
 	RegExState *DFAStartState = new RegExState(DFAStartStateSet, ++m_nNextStateID);
 
@@ -282,6 +297,7 @@ void RegEx::ConvertNFAtoDFA() {
 
 	unmarkedStates.push_back(DFAStartState);
 	while(!unmarkedStates.empty()) {
+
 		RegExState* processingDFAState = unmarkedStates[unmarkedStates.size()-1];
 		unmarkedStates.pop_back();
 
@@ -291,12 +307,23 @@ void RegEx::ConvertNFAtoDFA() {
 			Move(*iter, processingDFAState->GetNFAState(), MoveRes);
 			EpsilonClosure(MoveRes, EpsilonClosureRes);
 
-			bool bFound		= false;
-			RegExState *s	= NULL;
+			std::set<RegExState*>::iterator MoveResItr;
+			std::set<RegExState*>::iterator EpsilonClosureResItr;
+			printf ( "e-CLOSURE({");
+			for (MoveResItr = MoveRes.begin(); MoveResItr != MoveRes.end(); ++MoveResItr) {
+				printf ( " %d ",(*MoveResItr)->m_nStateID);
+			}
+			printf ( "}) = { ");
+			for (EpsilonClosureResItr = EpsilonClosureRes.begin(); EpsilonClosureResItr != EpsilonClosureRes.end(); ++EpsilonClosureResItr) {
+				printf ( " %d ",(*EpsilonClosureResItr)->m_nStateID);
+			}
+			printf ( "}\n");
+
+			bool bFound = false;
+			RegExState *s   = NULL;
 			for(int i = 0; i < (int)m_DFATable.size(); ++i) {
 				s = m_DFATable[i];
-				if(s->GetNFAState() == EpsilonClosureRes)
-				{
+				if(s->GetNFAState() == EpsilonClosureRes) {
 					bFound = true;
 					break;
 				}
@@ -304,31 +331,37 @@ void RegEx::ConvertNFAtoDFA() {
 			if(!bFound) {
 				RegExState* U = new RegExState(EpsilonClosureRes, ++m_nNextStateID);
 				unmarkedStates.push_back(U);
-				m_DFATable.push_back(U);				
+				m_DFATable.push_back(U);                                
 				processingDFAState->AddTransition(*iter, U);
 			} else {
 				processingDFAState->AddTransition(*iter, s);
 			}
 		}
 	}
+
 }
 void RegEx::ReduceDFA() {
 	std::set<RegExState*> DeadEndSet;
-	for(int i = 0; i < (int)m_DFATable.size(); ++i)
-		if(m_DFATable[i]->IsDeadEnd())
+	for(int i = 0; i < (int)m_DFATable.size(); ++i) {
+		if(m_DFATable[i]->IsDeadEnd()) {
 			DeadEndSet.insert(m_DFATable[i]);
+		}
+	}
 
 	if(DeadEndSet.empty())
 		return;
 
 	std::set<RegExState*>::iterator iter;
-	for(iter=DeadEndSet.begin(); iter!=DeadEndSet.end(); ++iter) {
+	for(iter = DeadEndSet.begin(); iter != DeadEndSet.end(); ++iter) {
 		for(int i = 0; i < (int)m_DFATable.size(); ++i)
 			m_DFATable[i]->RemoveTransition(*iter);
+
 		std::deque<RegExState*>::iterator pos;
-		for(pos=m_DFATable.begin(); pos!=m_DFATable.end(); ++pos)
-			if(*pos == *iter)
+		for(pos=m_DFATable.begin(); pos!=m_DFATable.end(); ++pos) {
+			if(*pos == *iter) {
 				break;
+			}
+		}
 		m_DFATable.erase(pos);
 		delete *iter;
 	}
@@ -339,8 +372,17 @@ bool RegEx::SetRegEx(std::string strRegEx) {
 	CleanUp();
 	if(!ConstructThompsonNFA(strRegEx))
 		return false;	
+
+	PopNFA( m_NFATable);
+	m_NFATable[m_NFATable.size() - 1 ]->m_bAcceptingState = true;
+
 	ConvertNFAtoDFA();
 	ReduceDFA();
+
+	std::deque<RegExState*>::iterator itr;
+	for ( itr = m_DFATable.begin(); itr != m_DFATable.end(); ++itr){
+		//printf ( "DFA STATES = [%d]\n", (*itr)->m_nStateID);
+	}
 	return true;
 }
 
@@ -478,23 +520,23 @@ bool RegEx::ConstructThompsonNFA(std::string strRegEx) {
 			switch ( curChar ) {
 				case CLOSURE:
 					Closure();
-					printf ( "Size of Stack after Closure = %d\n", m_CharacterClassStack.size());
+					//printf ( "Size of Stack after Closure = %d\n", m_CharacterClassStack.size());
 					break;
 				case PLUS_CLOSURE:
 					ClosurePlus();
-					printf ( "Size of Stack after ClosurePlus = %d\n", m_CharacterClassStack.size());
+					//printf ( "Size of Stack after ClosurePlus = %d\n", m_CharacterClassStack.size());
 					break;
 				case OPTIONAL:
 					ClosureOptional();
-					printf ( "Size of Stack after ClosureOptional = %d\n", m_CharacterClassStack.size());
+					//printf ( "Size of Stack after ClosureOptional = %d\n", m_CharacterClassStack.size());
 					break;
 				case OR:
 					Or();
-					printf ( "Size of Stack after Or = %d\n", m_CharacterClassStack.size());
+					//printf ( "Size of Stack after Or = %d\n", m_CharacterClassStack.size());
 					break;
 				case FALSE_CONCAT:
 					Concatenate();
-					printf ( "Size of Stack after Concatenate = %d\n", m_CharacterClassStack.size());
+					//printf ( "Size of Stack after Concatenate = %d\n", m_CharacterClassStack.size());
 					break;
 			}
 		}		
@@ -564,7 +606,7 @@ bool RegEx::ConstructThompsonNFA(std::string strRegEx) {
 
 	//strRegEx = ConcatExpand(strRegEx);
 	/*for(int i = 0; i < (int)strRegEx.size(); ++i) {
-		printf ( "CURRENT SYMBOL = %c\n", strRegEx[i]);
+		//printf ( "CURRENT SYMBOL = %c\n", strRegEx[i]);
 		if ( strRegEx[i] == CLOSURE ) {
 			Closure();
 		} else if (strRegEx[i] ==  OPTIONAL) {
@@ -584,7 +626,7 @@ bool RegEx::ConstructThompsonNFA(std::string strRegEx) {
 			}
 		}
 	}*/
-		/*printf ( "Current Symbol [%c]\n", CurChar );
+		/*//printf ( "Current Symbol [%c]\n", CurChar );
 		if(IsInput(CurChar)) {
 			Concatenate( CurChar );
 		} else if ( CurChar == CLOSURE) {
@@ -646,3 +688,63 @@ bool RegEx::ConstructThompsonNFA(std::string strRegEx) {
 				--iter;
 			}
 		}*/
+
+
+
+/*std::set<RegExState*> NFAStartStateSet;
+	NFAStartStateSet.insert(m_NFATable[0]); // Initialize 
+
+	std::set<RegExState*>::iterator itr;
+	for ( itr = NFAStartStateSet.begin(); itr != NFAStartStateSet.end(); ++itr) {
+		//printf ( "STATE ID = %d\n", (*itr)->m_nStateID);
+	}
+
+	std::set<RegExState*> DFAStartStateSet;
+	EpsilonClosure(NFAStartStateSet, DFAStartStateSet);
+	for ( itr = DFAStartStateSet.begin(); itr != DFAStartStateSet.end(); ++itr) {
+		printf ( "EPSILON CLOSURE STATES = %d\n", (*itr)->m_nStateID);
+	}
+
+	RegExState *DFAStartState = new RegExState(DFAStartStateSet, ++m_nNextStateID);
+	m_DFATable.push_back(DFAStartState);
+
+	std::vector<RegExState*> UnTestedStates;
+	UnTestedStates.push_back(DFAStartState);
+
+	while(!UnTestedStates.empty()) {
+		RegExState* CurrentDFAState = UnTestedStates[UnTestedStates.size()-1];
+		//printf ( "Current DFA STATE = %d\n", CurrentDFAState->m_nStateID);
+		UnTestedStates.pop_back();
+
+		std::set<char>::iterator iter;
+		for(iter = m_InputSet.begin(); iter != m_InputSet.end(); ++iter) {
+			//printf ( "Current Input Symbol = %c\n", *iter);
+			std::set<RegExState*> MoveResult, EpsilonClosureResult;
+			Move(*iter, CurrentDFAState->GetNFAState(), MoveResult);
+			EpsilonClosure(MoveResult, EpsilonClosureResult);
+			std::set<RegExState*>::iterator itr1;
+			for ( itr1 = MoveResult.begin(); itr1 != MoveResult.end(); ++itr1) {
+				//printf ( "Move Result State = %d\n", (*itr1)->m_nStateID);
+			}
+
+			bool bFound		= false;
+			RegExState *s	= NULL;
+			for(int index = 0; index < (int)m_DFATable.size(); ++index) {
+				s = m_DFATable[index];
+				if(s->GetNFAState() == EpsilonClosureResult) {
+					bFound = true;
+					break;
+				}
+			}
+			if(!bFound) {
+				RegExState* U = new RegExState(EpsilonClosureResult, ++m_nNextStateID);
+				UnTestedStates.push_back(U);
+				m_DFATable.push_back(U);	
+				printf ( "DFA TRANSITION from [%d] to [%d] for %c\n", CurrentDFAState->m_nStateID, U->m_nStateID, *iter);
+				CurrentDFAState->AddTransition(*iter, U);
+			} else {
+				printf ( "DFA TRANSITION from [%d] to [%d] for %c\n", CurrentDFAState->m_nStateID, s->m_nStateID, *iter);
+				CurrentDFAState->AddTransition(*iter, s);
+			}
+		}
+	}*/

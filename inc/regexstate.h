@@ -14,8 +14,8 @@ private:
 public:
 
 	int m_nStateID;
-
 	bool m_bAcceptingState;
+	bool m_Marked;
 
 	RegExState() : m_nStateID(-1), m_bAcceptingState(false) {};
 	RegExState(int nID) : m_nStateID(nID), m_bAcceptingState(false) {};
