@@ -52,7 +52,7 @@ void RegEx::CleanUp() {
 	m_PatternList.clear();
 }
 
-bool RegEx::PopNFA(std::deque<RegExState*>  &NFATable) {
+bool RegEx::PopNFA(std::vector<RegExState*>  &NFATable) {
 	if(m_CharacterClassStack.size()>0) {
 		NFATable = m_CharacterClassStack.top();
 		m_CharacterClassStack.pop();
@@ -62,12 +62,12 @@ bool RegEx::PopNFA(std::deque<RegExState*>  &NFATable) {
 }
 
 bool RegEx::Concatenate() {
-	std::deque<RegExState*>  LeftExpr, RightExpr;
+	std::vector<RegExState*>  LeftExpr, RightExpr;
 	if(!PopNFA(RightExpr) || !PopNFA(LeftExpr))
 		return false;
 
-	std::deque<RegExState*>::reverse_iterator pLeftItr = LeftExpr.rbegin();
-	std::deque<RegExState*>::iterator pRightItr = RightExpr.begin();        
+	std::vector<RegExState*>::reverse_iterator pLeftItr = LeftExpr.rbegin();
+	std::vector<RegExState*>::iterator pRightItr = RightExpr.begin();        
 
 	////printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*pLeftItr))->m_nStateID, ((*pRightItr))->m_nStateID);
 	((*pLeftItr))->AddTransition(EPSILON, ((*pRightItr)));
@@ -86,7 +86,7 @@ void RegEx::PushOnCharacterStack(char chInput) {
 	////printf ( "Transition from [%d] to [%d] on [%c]\n", s0->m_nStateID, s1->m_nStateID, chInput);
 	s0->AddTransition(chInput, s1);
 
-	std::deque<RegExState*>  NewExpr;
+	std::vector<RegExState*>  NewExpr;
 	NewExpr.push_back(s0);
 	NewExpr.push_back(s1);
 	m_CharacterClassStack.push(NewExpr);
@@ -96,15 +96,15 @@ void RegEx::PushOnCharacterStack(char chInput) {
 
 bool RegEx::ClosureOptional() {
 
-	std::deque<RegExState*> PrevExpr;
+	std::vector<RegExState*> PrevExpr;
 	if(!PopNFA(PrevExpr))
 		return false;
 
 	RegExState *LeftExpr  = new RegExState(++m_nNextStateID);
 	RegExState *RightExpr = new RegExState(++m_nNextStateID);
 
-	std::deque<RegExState*>::reverse_iterator rItr = PrevExpr.rbegin();
-	std::deque<RegExState*>::iterator Itr = PrevExpr.begin();
+	std::vector<RegExState*>::reverse_iterator rItr = PrevExpr.rbegin();
+	std::vector<RegExState*>::iterator Itr = PrevExpr.begin();
 
 	////printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, RightExpr->m_nStateID);
 	LeftExpr->AddTransition(EPSILON, RightExpr);
@@ -115,7 +115,7 @@ bool RegEx::ClosureOptional() {
 	////printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, RightExpr->m_nStateID);
 	(*(rItr))->AddTransition(EPSILON, RightExpr);
 
-	PrevExpr.push_front( LeftExpr );
+	PrevExpr.insert( PrevExpr.begin(), LeftExpr );
 	PrevExpr.push_back ( RightExpr);
 
 	m_CharacterClassStack.push(PrevExpr);
@@ -124,15 +124,15 @@ bool RegEx::ClosureOptional() {
 }
 
 bool RegEx::ClosurePlus() {
-	std::deque<RegExState*> PrevExpr;
+	std::vector<RegExState*> PrevExpr;
 	if(!PopNFA(PrevExpr))
 		return false;
 
 	RegExState *LeftExpr  = new RegExState(++m_nNextStateID);
 	RegExState *RightExpr = new RegExState(++m_nNextStateID);
 
-	std::deque<RegExState*>::reverse_iterator rItr = PrevExpr.rbegin();
-	std::deque<RegExState*>::iterator Itr = PrevExpr.begin();
+	std::vector<RegExState*>::reverse_iterator rItr = PrevExpr.rbegin();
+	std::vector<RegExState*>::iterator Itr = PrevExpr.begin();
 
 	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*Itr))->m_nStateID);
 	LeftExpr->AddTransition(EPSILON, ((*Itr)));
@@ -143,7 +143,7 @@ bool RegEx::ClosurePlus() {
 	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, ((*Itr))->m_nStateID);
 	(*(rItr))->AddTransition(EPSILON, ((*Itr)));
 
-	PrevExpr.push_front( LeftExpr );
+	PrevExpr.insert( PrevExpr.begin(), LeftExpr );
 	PrevExpr.push_back ( RightExpr);
 
 	m_CharacterClassStack.push(PrevExpr);
@@ -152,15 +152,15 @@ bool RegEx::ClosurePlus() {
 }
 bool RegEx::Closure() {
 
-	std::deque<RegExState*> PrevExpr;
+	std::vector<RegExState*> PrevExpr;
 	if(!PopNFA(PrevExpr))
 		return false;
 
 	RegExState *LeftExpr  = new RegExState(++m_nNextStateID);
 	RegExState *RightExpr = new RegExState(++m_nNextStateID);
 
-	std::deque<RegExState*>::reverse_iterator rItr = PrevExpr.rbegin();
-	std::deque<RegExState*>::iterator Itr = PrevExpr.begin();
+	std::vector<RegExState*>::reverse_iterator rItr = PrevExpr.rbegin();
+	std::vector<RegExState*>::iterator Itr = PrevExpr.begin();
 
 	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, RightExpr->m_nStateID);
 	LeftExpr->AddTransition(EPSILON, RightExpr);
@@ -174,7 +174,7 @@ bool RegEx::Closure() {
 	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*rItr))->m_nStateID, ((*Itr))->m_nStateID);
 	(*(rItr))->AddTransition(EPSILON, ((*Itr)));
 
-	PrevExpr.push_front( LeftExpr );
+	PrevExpr.insert( PrevExpr.begin(), LeftExpr );
 	PrevExpr.push_back ( RightExpr);
 
 	m_CharacterClassStack.push(PrevExpr);
@@ -184,7 +184,7 @@ bool RegEx::Closure() {
 
 bool RegEx::Or() {
 
-	std::deque<RegExState*>  UpperExpr, LowerExpr;
+	std::vector<RegExState*>  UpperExpr, LowerExpr;
 
 	//printf ( "Size of Stack = %d\n", m_CharacterClassStack.size());
 
@@ -194,32 +194,32 @@ bool RegEx::Or() {
 	RegExState *LeftExpr	= new RegExState(++m_nNextStateID);
 	RegExState *RightExpr	= new RegExState(++m_nNextStateID);
 
-	std::deque<RegExState*>::iterator UBeginItr = UpperExpr.begin();
+	std::vector<RegExState*>::iterator UBeginItr = UpperExpr.begin();
 	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*UBeginItr))->m_nStateID);
 	LeftExpr->AddTransition(EPSILON, ((*UBeginItr)));
 
-	std::deque<RegExState*>::iterator LBeginItr = LowerExpr.begin();
+	std::vector<RegExState*>::iterator LBeginItr = LowerExpr.begin();
 	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", LeftExpr->m_nStateID, ((*LBeginItr))->m_nStateID);
 	LeftExpr->AddTransition(EPSILON, ((*LBeginItr)));
 
-	std::deque<RegExState*>::reverse_iterator URIterator = UpperExpr.rbegin();
+	std::vector<RegExState*>::reverse_iterator URIterator = UpperExpr.rbegin();
 	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*URIterator))->m_nStateID, RightExpr->m_nStateID);
 	((*URIterator))->AddTransition(EPSILON, RightExpr);
 
-	std::deque<RegExState*>::reverse_iterator LRIterator = LowerExpr.rbegin();
+	std::vector<RegExState*>::reverse_iterator LRIterator = LowerExpr.rbegin();
 	//printf ( "Transition from [%d] to [%d] on [EPSILON]\n", ((*LRIterator))->m_nStateID, RightExpr->m_nStateID);
 	((*LRIterator))->AddTransition(EPSILON, RightExpr);
 
 	LowerExpr.push_back(RightExpr);
-	UpperExpr.push_front(LeftExpr);
+	UpperExpr.insert(UpperExpr.begin(),LeftExpr);
 	UpperExpr.insert(UpperExpr.end(), LowerExpr.begin(), LowerExpr.end());
 
 	m_CharacterClassStack.push(UpperExpr);
 
-	std::deque<RegExState*>::iterator itr;
-	for ( itr = UpperExpr.begin(); itr != UpperExpr.end(); ++itr) {
-		//printf ( "%d - ", (*itr)->m_nStateID);
-	}
+	//std::vector<RegExState*>::iterator itr;
+	//for ( itr = UpperExpr.begin(); itr != UpperExpr.end(); ++itr) {
+	//	printf ( "%d - ", (*itr)->m_nStateID);
+	//}
 	//printf ( "\n" );
 	return true;
 }
@@ -352,6 +352,7 @@ void RegEx::ConvertNFAtoDFA() {
 			}
 		}
 	}
+	ReduceDFA();
 
 }
 void RegEx::ReduceDFA() {
@@ -368,8 +369,8 @@ void RegEx::ReduceDFA() {
 		for(int i = 0; i < (int)m_DFATable.size(); ++i)
 			m_DFATable[i]->RemoveTransition(*iter);
 
-		std::deque<RegExState*>::iterator pos;
-		for(pos=m_DFATable.begin(); pos!=m_DFATable.end(); ++pos) {
+		std::vector<RegExState*>::iterator pos;
+		for(pos = m_DFATable.begin(); pos != m_DFATable.end(); ++pos) {
 			if(*pos == *iter) {
 				break;
 			}
@@ -377,6 +378,41 @@ void RegEx::ReduceDFA() {
 		m_DFATable.erase(pos);
 		delete *iter;
 	}
+}
+void RegEx::printNFA() {
+	std::vector<RegExState*>::iterator itr;
+	for ( itr = m_NFATable.begin(); itr != m_NFATable.end(); ++itr){
+		std::multimap<char, RegExState*>::iterator A;
+		for ( A = (*itr)->m_Transition.begin(); A != (*itr)->m_Transition.end(); ++A) {
+			char ch = A->first;
+			RegExState *S = A->second;
+			printf ( "[%d] --- %c -----> ", (*itr)->m_nStateID, ch);
+			if ( S->m_bAcceptingState == true ) {
+				printf ( " - [[%d]]\n", S->m_nStateID);
+			} else {
+				printf ( " - [%d]\n", S->m_nStateID);
+			}
+		}	
+	}
+	printf ( "--------------------------------------------------------------\n");
+}
+void RegEx::printDFA() {
+	std::vector<RegExState*>::iterator itr;
+	for ( itr = m_DFATable.begin(); itr != m_DFATable.end(); ++itr){
+		std::multimap<char, RegExState*>::iterator A;
+		for ( A = (*itr)->m_Transition.begin(); A != (*itr)->m_Transition.end(); ++A) {
+			char ch = A->first;
+			RegExState *S = A->second;
+			printf ( "[%d] --- %c -----> ", (*itr)->m_nStateID, ch);
+			if ( S->m_bAcceptingState == true ) {
+				printf ( " - [[%d]]\n", S->m_nStateID);
+			} else {
+				printf ( " - [%d]\n", S->m_nStateID);
+			}
+
+		}	
+	}
+	printf ( "--------------------------------------------------------------\n");
 }
 
 bool RegEx::SetRegEx(std::string strRegEx) {
@@ -389,43 +425,7 @@ bool RegEx::SetRegEx(std::string strRegEx) {
 	m_NFATable[m_NFATable.size() - 1 ]->m_bAcceptingState = true;
 
 	ConvertNFAtoDFA();
-	{
-	std::deque<RegExState*>::iterator itr;
-	for ( itr = m_DFATable.begin(); itr != m_DFATable.end(); ++itr){
-		std::multimap<char, RegExState*>::iterator A;
-		for ( A = (*itr)->m_Transition.begin(); A != (*itr)->m_Transition.end(); ++A) {
-			char ch = A->first;
-			RegExState *S = A->second;
-			printf ( "[%d] --- %c -----> ", (*itr)->m_nStateID, ch);
-			if ( S->m_bAcceptingState == true ) {
-				printf ( " - [[%d]]\n", S->m_nStateID);
-			} else {
-				printf ( " - [%d]\n", S->m_nStateID);
-			}
-
-		}	
-	}
-	}
-	printf ( "===========================\n");
-
-	ReduceDFA();
-	{
-	std::deque<RegExState*>::iterator itr;
-	for ( itr = m_DFATable.begin(); itr != m_DFATable.end(); ++itr){
-		std::multimap<char, RegExState*>::iterator A;
-		for ( A = (*itr)->m_Transition.begin(); A != (*itr)->m_Transition.end(); ++A) {
-			char ch = A->first;
-			RegExState *S = A->second;
-			printf ( "[%d] --- %c -----> ", (*itr)->m_nStateID, ch);
-			if ( S->m_bAcceptingState == true ) {
-				printf ( " - [[%d]]\n", S->m_nStateID);
-			} else {
-				printf ( " - [%d]\n", S->m_nStateID);
-			}
-
-		}	
-	}
-	}
+	printDFA();	
 	return true;
 }
 

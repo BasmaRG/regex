@@ -30,7 +30,7 @@ void RegExState::RemoveTransition(RegExState* pState) {
 	}
 }
 
-void RegExState::GetTransition(char inputCh, std::vector<RegExState*> &States) {
+void RegExState::GetTransition(char inputCh, Table &States) {
 	States.clear();
 	std::multimap<char, RegExState*>::iterator iter;
 	for(iter = m_Transition.lower_bound(inputCh); iter != m_Transition.upper_bound(inputCh); ++iter) {

@@ -12,6 +12,7 @@ private:
 	std::set<RegExState*> m_NFAStates;
 	
 public:
+	typedef std::vector<RegExState*> Table;
 	std::multimap<char, RegExState*> m_Transition;	
 	int m_nStateID;
 	bool m_bAcceptingState;
@@ -26,7 +27,7 @@ public:
 
 	void AddTransition(char inputCh, RegExState *pState);
 	void RemoveTransition(RegExState* pState);
-	void GetTransition(char inputCh, std::vector<RegExState*> &States);
+	void GetTransition(char inputCh, Table &States);
 	std::set<RegExState*>& RegExState::GetNFAState();
 
 	bool IsDeadEnd();
