@@ -7,19 +7,19 @@
 #include <string>
 
 class RegExState{
-private:
-	
-	std::set<RegExState*> m_NFAStates;
-	
+private:	
+	std::set<RegExState*> m_NFAStates;	
 public:
 	typedef std::vector<RegExState*> Table;
+	typedef std::set<RegExState*>::iterator StateIterator;
 	std::multimap<char, RegExState*> m_Transition;	
 	int m_nStateID;
 	bool m_bAcceptingState;
 	bool m_Marked;
+	int  m_GroupID;
 
 	RegExState() : m_nStateID(-1), m_bAcceptingState(false) {};
-	RegExState(int nID) : m_nStateID(nID), m_bAcceptingState(false) {};
+	RegExState(int nID) : m_nStateID(nID), m_bAcceptingState(false), m_GroupID(0) {};
 	RegExState(std::set<RegExState*> NFAState, int nID);
 	RegExState(const RegExState &other);
 

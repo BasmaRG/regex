@@ -23,6 +23,10 @@ public:
 	bool FindNext(int &nPos, std::string &strPattern);
 
 	typedef std::vector<RegExState*> Table;
+	typedef Table::reverse_iterator TableReverseIterator;
+	typedef Table::iterator TableIterator; 
+	typedef std::set<RegExState*>::iterator StateIterator;
+
 
 
 private:
@@ -47,7 +51,7 @@ private:
 
 	bool ConstructThompsonNFA(std::string strRegEx);
 	void PushOnCharacterStack(char chInput);
-	bool PopNFA(Table  &NFATable);
+	bool PopTable(Table  &NFATable);
 	bool EvalMetaChar(char);
 	bool Concatenate();
 	bool Closure();
@@ -72,9 +76,10 @@ private:
 	int PrePreprocessConcatenation();
 	int PreProcessOr();
 	int PreProcess();
+	void PartitionStates (Table &MinStatesDFA, Table &MinEndStatesDFA);
+	void MinimizeDFA ();
 
-	void printNFA();
-	void printDFA();
+	void PrintTable(Table &table);
 	
 protected:
 };
