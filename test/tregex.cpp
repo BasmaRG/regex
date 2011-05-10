@@ -4,24 +4,43 @@
 #include "regex.h"
 int main( int argc, char **argv ) {
 	RegEx myRegEx;
-	/*myRegEx.SetRegEx("ab*c|d");
-	myRegEx.SetRegEx("a|b");
-	myRegEx.SetRegEx("((a|b)|cd)");	*/
-	myRegEx.SetRegEx("D*\\.D|D\\.D*");/*
-	myRegEx.SetRegEx("(a|b)c");	
-	myRegEx.SetRegEx("ab*a");
-	myRegEx.SetRegEx("(a|b)a*b");
-	myRegEx.SetRegEx("a(bb)+a");
-	myRegEx.SetRegEx("(a|b)|cd");
-	myRegEx.SetRegEx("(a|b)*abbb");
-	myRegEx.SetRegEx("(1|0)*1");
-	myRegEx.SetRegEx("abcdefghi");
-	myRegEx.SetRegEx("(a|b)*abb");*/
-	std::string pattern;
-	bool match = myRegEx.Match("abbbbc");
-	match = myRegEx.Match("abbbbd");
+	myRegEx.Compile("ab*c|d");
+	bool match = myRegEx.Match("abc");
+	match = myRegEx.Match("d");
 
-/*	myRegEx.Match("Hello How are you ab", position, pattern);
-	myRegEx.Match("Hello How are you cd", position, pattern);*/
+	/*myRegEx.Compile("a|b");
+	myRegEx.Compile("((a|b)|cd)");	
+	myRegEx.Compile("D*\\.D|D\\.D*");
+	myRegEx.Compile("(a|b)c");	
+	myRegEx.Compile("ab*a");
+	myRegEx.Compile("(a|b)a*b");
+	myRegEx.Compile("a(bb)+a");
+	myRegEx.Compile("(a|b)|cd");
+	myRegEx.Compile("(a|b)*abbb");
+	myRegEx.Compile("(1|0)*1");
+	myRegEx.Compile("abcdefghi");
+	myRegEx.Compile("(a|b)*abb");*/
+	myRegEx.Compile("(a|b)*abb");
+	std::string pattern;
+	match = myRegEx.Match("abb");
+	match = myRegEx.Match("abbbbd");
+	match = myRegEx.Match("xyzxyz");
+	match = myRegEx.Match("abx");
+
+	myRegEx.Compile("ba?");
+	match = myRegEx.Match("b");
+	match = myRegEx.Match("ba");
+	match = myRegEx.Match("bc");
+
+	myRegEx.Compile("ba+");
+	match = myRegEx.Match("b");
+	match = myRegEx.Match("ba");
+	match = myRegEx.Match("bc");
+
+	myRegEx.Compile("(abc)|(def)");
+	match = myRegEx.Match("abef");
+	match = myRegEx.Match("abcef");
+	match = myRegEx.Match("abdef");
+	match = myRegEx.Match("abxyz");
 	return 0;
 }

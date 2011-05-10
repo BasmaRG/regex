@@ -17,7 +17,7 @@ public:
 	RegEx();
 	~RegEx();
 
-	bool SetRegEx(std::string strRegEx);
+	bool Compile(std::string strRegEx);
 	bool Match(std::string strText);
 	typedef std::vector<RegExState*> Table;
 	typedef Table::reverse_iterator TableReverseIterator;
@@ -63,7 +63,6 @@ private:
 	void ConvertNFAtoDFA();
 	void ReduceDFA();
 	void CleanUp();
-	bool Find();
 
 	int CovertToPostfix();
 	int PreProcessLiterals();
