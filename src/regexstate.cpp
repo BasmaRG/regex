@@ -1,3 +1,4 @@
+#include <sstream>
 #include "regexstate.h"
 
 RegExState::RegExState(std::set<RegExState*> NFAState, int nID) {
@@ -71,8 +72,16 @@ bool RegExState::operator==(const RegExState& other) {
 	else 
 		return(m_NFAStates == other.m_NFAStates);
 }
-
-
+std::string RegExState::getStringID(){
+	std::string result;
+	std::stringstream out;
+	//if(m_bAcceptingState){
+	//	out << "{" << m_nStateID << "}";
+	//} else {
+		out << m_nStateID;
+	//}
+	return out.str();
+}
 
 
 

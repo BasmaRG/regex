@@ -1,4 +1,7 @@
 #include <algorithm>
+#include <sstream>
+#include <iostream>
+#include <fstream>
 #include "regex.h"
 
 
@@ -11,7 +14,7 @@
 #define OR            '|'
 #define FALSE_CONCAT  '&'
 
-
+#define PRINT_DEBUG 1
 
 RegEx::RegEx() {
 }
@@ -50,10 +53,6 @@ void RegEx::CleanUp() {
 
 	m_InputSet.clear();
 
-	std::list<RegExPattern*>::iterator iter;
-	for(iter = m_PatternList.begin(); iter != m_PatternList.end(); ++iter)
-		delete *iter;
-	m_PatternList.clear();
 }
 
 bool RegEx::PopTable(Table  &NFATable) {
@@ -67,21 +66,32 @@ bool RegEx::PopTable(Table  &NFATable) {
 
 bool RegEx::Concatenate() {
 
-	Table  LeftTable, RightTable;
-	if(!PopTable(RightTable) || !PopTable(LeftTable))
+    Table  LeftTable, RightTable;
+    if(!PopTable(RightTable) || !PopTable(LeftTable))
 		return false;
+	#ifdef PRINT_DEBUG
+		std::cout << (*(LeftTable.rbegin()))->m_nStateID << " --> " << (*(RightTable.begin()))->m_nStateID << " [ " << "EPSILON" << " ] " << std::endl;
+	#endif
 
 	(*(LeftTable.rbegin()))->AddTransition(EPSILON, (*(RightTable.begin())));
 	LeftTable.insert(LeftTable.end(), RightTable.begin(), RightTable.end());
 	m_CharacterClassStack.push(LeftTable);
+
+	#ifdef PRINT_DEBUG
+		PrintTable( LeftTable);
+	#endif
 
 	return true;
 }
 
 void RegEx::PushOnCharacterStack(char chInput) {
 
-	RegExState *s0 = new RegExState(++m_nNextStateID);
-	RegExState *s1 = new RegExState(++m_nNextStateID);
+	RegExState *s0 = new RegExState(m_nNextStateID++);
+	RegExState *s1 = new RegExState(m_nNextStateID++);
+
+	#ifdef PRINT_DEBUG
+	 std::cout << s0->m_nStateID << " --> " << s1->m_nStateID << " [ " << chInput << " ] " << std::endl;
+	#endif
 	s0->AddTransition(chInput, s1);
 
 	Table NewSubTable;
@@ -98,8 +108,8 @@ bool RegEx::ClosureOptional() {
 	if(!PopTable(PrevTable))
 		return false;
 
-	RegExState *LeftTable  = new RegExState(++m_nNextStateID);
-	RegExState *RightTable = new RegExState(++m_nNextStateID);
+	RegExState *LeftTable  = new RegExState(m_nNextStateID++);
+	RegExState *RightTable = new RegExState(m_nNextStateID++);
 
 	LeftTable->AddTransition(EPSILON, RightTable);
 	LeftTable->AddTransition(EPSILON, ((*(PrevTable.begin()))));
@@ -118,8 +128,8 @@ bool RegEx::ClosurePlus() {
 	if(!PopTable(PrevTable))
 		return false;
 
-	RegExState *LeftTable  = new RegExState(++m_nNextStateID);
-	RegExState *RightTable = new RegExState(++m_nNextStateID);
+	RegExState *LeftTable  = new RegExState(m_nNextStateID++);
+	RegExState *RightTable = new RegExState(m_nNextStateID++);
 
 	LeftTable->AddTransition(EPSILON, ((*(PrevTable.begin()))));
 	((*(PrevTable.rbegin())))->AddTransition(EPSILON, RightTable);
@@ -138,8 +148,15 @@ bool RegEx::Closure() {
 	if(!PopTable(PrevTable))
 		return false;
 
-	RegExState *LeftTable  = new RegExState(++m_nNextStateID);
-	RegExState *RightTable = new RegExState(++m_nNextStateID);
+	RegExState *LeftTable  = new RegExState(m_nNextStateID++);
+	RegExState *RightTable = new RegExState(m_nNextStateID++);
+
+	#ifdef PRINT_DEBUG
+		std::cout << LeftTable->m_nStateID << " --> " << RightTable->m_nStateID << " [ " << "EPSILON" << " ] " << std::endl;
+		std::cout << LeftTable->m_nStateID << " --> " << ((*(PrevTable.begin())))->m_nStateID << " [ " << "EPSILON" << " ] " << std::endl;
+		std::cout << ((*(PrevTable.rbegin())))->m_nStateID << " --> " << RightTable->m_nStateID << " [ " << "EPSILON" << " ] " << std::endl;
+		std::cout << ((*(PrevTable.rbegin())))->m_nStateID << " --> " << ((*(PrevTable.begin())))->m_nStateID << " [ " << "EPSILON" << " ] " << std::endl;
+	#endif
 
 	LeftTable->AddTransition(EPSILON, RightTable);
 	LeftTable->AddTransition(EPSILON, ((*(PrevTable.begin()))));
@@ -148,6 +165,10 @@ bool RegEx::Closure() {
 
 	PrevTable.insert( PrevTable.begin(), LeftTable );
 	PrevTable.push_back ( RightTable);
+
+	#ifdef PRINT_DEBUG
+		PrintTable( PrevTable);
+	#endif
 
 	m_CharacterClassStack.push(PrevTable);
 
@@ -161,8 +182,15 @@ bool RegEx::Or() {
 	if(!PopTable(LowerTable) || !PopTable(UpperTable))
 		return false;
 
-	RegExState *LeftTable	= new RegExState(++m_nNextStateID);
-	RegExState *RightTable	= new RegExState(++m_nNextStateID);
+	RegExState *LeftTable	= new RegExState(m_nNextStateID++);
+	RegExState *RightTable	= new RegExState(m_nNextStateID++);
+	
+	#ifdef PRINT_DEBUG
+		std::cout << LeftTable->m_nStateID << " --> " << ((*(UpperTable.begin())))->m_nStateID << " [ " << "EPSILON" << " ] " << std::endl;
+		std::cout << LeftTable->m_nStateID << " --> " << ((*(LowerTable.begin())))->m_nStateID << " [ " << "EPSILON" << " ] " << std::endl;
+		std::cout << ((*(UpperTable.rbegin())))->m_nStateID << " --> " << RightTable->m_nStateID << " [ " << "EPSILON" << " ] " << std::endl;
+		std::cout << ((*(LowerTable.rbegin())))->m_nStateID << " --> " << RightTable->m_nStateID << " [ " << "EPSILON" << " ] " << std::endl;
+	#endif
 
 	LeftTable->AddTransition(EPSILON, ((*(UpperTable.begin()))));
 	LeftTable->AddTransition(EPSILON, ((*(LowerTable.begin()))));
@@ -175,32 +203,36 @@ bool RegEx::Or() {
 
 	m_CharacterClassStack.push(UpperTable);
 
+	#ifdef PRINT_DEBUG
+		PrintTable ( UpperTable );
+	#endif
+
 	return true;
 }
 void RegEx::EpsilonClosure(std::set<RegExState*> startSet, std::set<RegExState*> &result) {
-	std::stack<RegExState*> UnTestedStates;	
-
+	std::stack<RegExState*> UnVisitedStates;	
 	result.clear();	
-	result = startSet; // Each State is epsilon closure to itself.
-
+	result = startSet; 
 	StateIterator iter;
 	for(iter = startSet.begin(); iter != startSet.end(); ++iter) {
-		UnTestedStates.push(*iter);
+		UnVisitedStates.push(*iter);
 	}
 
-	while(!UnTestedStates.empty()) {
-		RegExState* curState = UnTestedStates.top();
-		UnTestedStates.pop();
+	while(!UnVisitedStates.empty()) {
+		RegExState* curState = UnVisitedStates.top();
+		UnVisitedStates.pop();
 
+		std::cout << "Current State " <<  curState->m_nStateID << std::endl;
 		Table epsilonStates;
 		curState->GetTransition(EPSILON, epsilonStates);
 
-		for(int i = 0; i < (int)epsilonStates.size(); ++i) {
-			RegExState* epsilonState = epsilonStates[i];
-			if(result.find(epsilonState) == result.end()) {
-				epsilonState->m_Marked = false;
-				result.insert(epsilonState);
-				UnTestedStates.push(epsilonState);
+		TableIterator epsilonItr;
+
+		for ( epsilonItr = epsilonStates.begin(); epsilonItr != epsilonStates.end(); ++epsilonItr ){
+			std::cout << "State = " << (*epsilonItr)->m_nStateID << std::endl;
+			if(result.find((*epsilonItr)) == result.end()) {
+				result.insert((*epsilonItr));
+				UnVisitedStates.push((*epsilonItr));
 			}
 		}
 	}
@@ -224,32 +256,43 @@ void RegEx::ConvertNFAtoDFA() {
 		delete m_DFATable[i];
 	m_DFATable.clear();
 
+//	PrintTable( m_NFATable);
 	if(m_NFATable.size() == 0)
 		return;
-
-	m_nNextStateID = 0;
-
-	Table unmarkedStates;
-	std::set<RegExState*> DFAStartStateSet;
+	
 	std::set<RegExState*> NFAStartStateSet;
-
 	NFAStartStateSet.insert(m_NFATable[0]);
 
+	std::set<RegExState*> DFAStartStateSet;
 	EpsilonClosure(NFAStartStateSet, DFAStartStateSet);
-	RegExState *DFAStartState = new RegExState(DFAStartStateSet, ++m_nNextStateID);
+
+	std::set<RegExState*>::iterator iter;
+	for ( iter = DFAStartStateSet.begin(); iter != DFAStartStateSet.end(); ++iter )
+		std::cout << (*iter)->m_nStateID << "\t" ;
+	std::cout << std::endl;
+
+	m_nNextStateID = 0;
+	RegExState *DFAStartState = new RegExState(DFAStartStateSet, m_nNextStateID++);
 
 	m_DFATable.push_back(DFAStartState);
 
-	unmarkedStates.push_back(DFAStartState);
-	while(!unmarkedStates.empty()) {
+	Table UnVisitedStates;
+	UnVisitedStates.push_back(DFAStartState);
+	while(!UnVisitedStates.empty()) {
 
-		RegExState* CurDFAState = unmarkedStates[unmarkedStates.size()-1];
-		unmarkedStates.pop_back();
+		RegExState* CurDFAState = UnVisitedStates[UnVisitedStates.size()-1];
+		UnVisitedStates.pop_back();
 
 		std::set<char>::iterator iter;
-		for(iter=m_InputSet.begin(); iter!=m_InputSet.end(); ++iter) {
+		for(iter = m_InputSet.begin(); iter != m_InputSet.end(); ++iter) {
 			std::set<RegExState*> MoveRes, EpsilonClosureRes;
 			Move(*iter, CurDFAState->GetNFAState(), MoveRes);
+
+			std::set<RegExState*>::iterator itr;
+			for ( itr = MoveRes.begin(); itr != MoveRes.end(); ++itr) 
+				std::cout << (*itr)->m_nStateID << "\t" ;
+			std::cout << std::endl;
+
 
 			EpsilonClosure(MoveRes, EpsilonClosureRes);
 
@@ -266,16 +309,18 @@ void RegEx::ConvertNFAtoDFA() {
 				}
 			}
 			if(!bFound) {
-				RegExState* U = new RegExState(EpsilonClosureRes, ++m_nNextStateID);
-				unmarkedStates.push_back(U);
+				RegExState* U = new RegExState(EpsilonClosureRes, m_nNextStateID++);
+				UnVisitedStates.push_back(U);
 				m_DFATable.push_back(U);                                
 				CurDFAState->AddTransition(*iter, U);
 			} else {
 				CurDFAState->AddTransition(*iter, s);
 			}
 		}
-	}
+	}	
+	PrintTable(m_DFATable);
 	ReduceDFA();
+	PrintTable(m_DFATable);
 }
 void RegEx::ReduceDFA() {
 	std::set<RegExState*> DeadEndSet;
@@ -302,74 +347,19 @@ void RegEx::ReduceDFA() {
 	}
 }
 
-void RegEx::PartitionStates (Table &NonAcceptTable, Table &AcceptTable) {
-	Table::const_iterator iter = m_DFATable.begin();
-	for ( iter = m_DFATable.begin(); iter != m_DFATable.end(); ++iter) {
-		if ((*iter)->m_bAcceptingState) {
-			if (std::find (AcceptTable.begin (), AcceptTable.end (), *iter) == AcceptTable.end ()) {
-				AcceptTable.push_back (*iter);
-			}
-		} else {
-			if (std::find (NonAcceptTable.begin (), NonAcceptTable.end (), *iter) == NonAcceptTable.end ()){
-				NonAcceptTable.push_back (*iter);
-			}
-		}
-	}
-}
 void RegEx::MinimizeDFA () {
-	m_nNextStateID = 0;
-	Table NonAcceptTable,AcceptTable;
-	PartitionStates( NonAcceptTable, AcceptTable);
-	if ( m_DFATable.size() != NonAcceptTable.size() + AcceptTable.size()) {
-		if ((*(m_DFATable.begin()))->m_bAcceptingState){
-			NonAcceptTable.insert (NonAcceptTable.begin (), AcceptTable.begin (),	AcceptTable.end ());
-		} else	{
-			NonAcceptTable.insert (NonAcceptTable.end (), AcceptTable.begin (),	AcceptTable.end ());
-		}
-		TableIterator DfaIter = NonAcceptTable.begin();
-		while (DfaIter != NonAcceptTable.end ()) {
-			RegExState *NewState = new RegExState(++m_nNextStateID);
-			NewState->m_bAcceptingState = (*(DfaIter))->m_bAcceptingState;
-			std::multimap<char, RegExState*>::iterator StateIter = (*(DfaIter))->m_Transition.begin();
-			while (StateIter != (*(DfaIter))->m_Transition.end()) {
-				bool bFound = false;
-				TableIterator DfaIter2 = NonAcceptTable.begin();
-			}
-		}
-	}
-}
-void RegEx::PrintTable(Table &table) {
-	TableIterator itr;
-	for ( itr = table.begin(); itr != table.end(); ++itr){
-		int stateid = (*itr)->m_nStateID;
-		int flagNoTransition = true;
-		std::multimap<char, RegExState*>::iterator A;
-		for ( A = (*itr)->m_Transition.begin(); A != (*itr)->m_Transition.end(); ++A) {
-			flagNoTransition = false;
-			char ch = A->first;
-			RegExState *S = A->second;
-			printf ( "(%d) ----- (%c) -----> ",stateid, ch);
-			if ( S->m_bAcceptingState == true ) {
-				printf ( " ((%d))\n", S->m_nStateID);
-			} else {
-				printf ( " (%d)\n", S->m_nStateID);
-			}
-		}	
-		if ( flagNoTransition ) {
-			printf ( "(%d) -----     ----->\n", stateid);
-		}
-	}
-	printf ( "--------------------------------------------------------------\n");
 }
 
 bool RegEx::SetRegEx(std::string strRegEx) {
 	m_InfixRegEx = const_cast<char*>(strRegEx.c_str());
 	CleanUp();
-	if(!ConstructThompsonNFA(strRegEx))
+	if(!ConstructThompsonNFA())
 		return false;	
 
 	PopTable( m_NFATable);
 	m_NFATable[m_NFATable.size() - 1 ]->m_bAcceptingState = true;
+	
+	PrintTable( m_NFATable);
 
 	ConvertNFAtoDFA();
 	PrintTable(m_DFATable);
@@ -377,38 +367,15 @@ bool RegEx::SetRegEx(std::string strRegEx) {
 	return true;
 }
 
-bool RegEx::FindFirst(std::string strText, int &nPos, std::string &strPattern) {
-	std::list<RegExPattern*>::iterator iter;
-	for(iter = m_PatternList.begin(); iter != m_PatternList.end(); ++iter)
-		delete *iter;
-	m_PatternList.clear();
-
+bool RegEx::Match(std::string strText) {
 	m_strText = strText;
-
 	if(Find()) {
-		nPos			= m_vecPos[0];
-		strPattern		= m_vecPattern[0];
-		m_nPatternIndex	= 0;
-		return true;
-	}
-	return false;
-}
-
-bool RegEx::FindNext(int &nPos, std::string &strPattern) {
-	++m_nPatternIndex;
-	if(m_nPatternIndex < (int)m_vecPos.size())	{
-		nPos			= m_vecPos[m_nPatternIndex];
-		strPattern		= m_vecPattern[m_nPatternIndex];
 		return true;
 	}
 	return false;
 }
 
 bool RegEx::Find() {
-	bool bRes = false;
-	m_vecPos.clear();
-	m_vecPattern.clear();
-
 	if(m_DFATable.empty())
 		return false;
 
@@ -419,25 +386,9 @@ bool RegEx::Find() {
 
 		Table Transition;
 		pState->GetTransition(c, Transition);
-
 		if(!Transition.empty()) {
-			RegExPattern *pPatternState = new RegExPattern();
-			pPatternState->m_nStartIndex	= i;
-			pPatternState->m_pState			= Transition[0];
-			m_PatternList.push_back(pPatternState);
-
-			if(Transition[0]->m_bAcceptingState){
-				m_vecPos.push_back(i);
-				std::string strTemp;
-				strTemp += c;
-				m_vecPattern.push_back(strTemp);
-			}
-		} else {
-			if(pState->m_bAcceptingState) {
-				m_vecPos.push_back(i);
-				std::string strTemp;
-				strTemp += c;
-				m_vecPattern.push_back(strTemp);
+			if(Transition[0]->m_bAcceptingState) {
+				return true;
 			}
 		}
 	}
@@ -501,10 +452,11 @@ int RegEx::CovertToPostfix() {
 	PreProcessOr();
 	return 0;
 }
-bool RegEx::ConstructThompsonNFA(std::string strRegEx) {
+bool RegEx::ConstructThompsonNFA() {
 	CovertToPostfix();
 	for(int i = 0; i < (int)m_PostStrRegEx.size(); ++i) {
 		char curChar = m_PostStrRegEx[i];
+		std::cout << "Current Processing " << curChar << std::endl;
 		if ( IsInput( curChar )) {
 			PushOnCharacterStack( curChar );
 		} else if ( IsMetaChar( curChar ) ) {
@@ -531,3 +483,34 @@ bool RegEx::ConstructThompsonNFA(std::string strRegEx) {
 }
 
 
+void RegEx::PrintTable(Table &table) {
+	std::string TableString;
+	for(int i = 0; i < (int)table.size(); ++i) {
+		RegExState *pState = table[i];
+		if(pState->m_bAcceptingState) {
+			TableString += "\t" + pState->getStringID() + "\t\n";
+		}
+	}
+	TableString += "\n";
+	for( int i = 0; i < (int)table.size(); ++i) {
+		RegExState *pState = table[i];
+		std::vector<RegExState*> State;
+		pState->GetTransition(EPSILON, State);
+		for(int j = 0; j < (int)State.size(); ++j) {
+			TableString += "\t" + pState->getStringID() + " -> " + State[j]->getStringID();
+			TableString += "\t[label = \"epsilon \"]\n";
+		}
+		std::set<char>::iterator iter;
+		for(iter = m_InputSet.begin(); iter != m_InputSet.end(); ++iter) {
+			pState->GetTransition(*iter, State);
+			for(int j = 0; j < (int)State.size(); ++j) {
+				TableString += "\t" + pState->getStringID() + " -> " + State[j]->getStringID();
+				std::stringstream out;
+				out << *iter;
+				TableString += "\t[label = \"" + out.str() + " \"]\n";
+			}
+		}
+	}
+	std::cout << TableString;
+}
+      

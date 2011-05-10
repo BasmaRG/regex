@@ -166,10 +166,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\inc\regexpattern.h"
-				>
-			</File>
-			<File
 				RelativePath="..\inc\regexstate.h"
 				>
 			</File>

@@ -10,7 +10,6 @@
 #include <map>
 
 #include "regexstate.h"
-#include "regexpattern.h"
 
 
 class RegEx {
@@ -19,9 +18,7 @@ public:
 	~RegEx();
 
 	bool SetRegEx(std::string strRegEx);
-	bool FindFirst(std::string strText, int &nPos, std::string &strPattern);
-	bool FindNext(int &nPos, std::string &strPattern);
-
+	bool Match(std::string strText);
 	typedef std::vector<RegExState*> Table;
 	typedef Table::reverse_iterator TableReverseIterator;
 	typedef Table::iterator TableIterator; 
@@ -36,7 +33,6 @@ private:
 	std::stack<Table >       m_CharacterClassStack;
 	std::stack<char>         m_ExpressionStack;
 	std::set<char>           m_InputSet;
-	std::list<RegExPattern*> m_PatternList;
 	std::string              m_strText;
 	std::vector<int>         m_vecPos;
 	std::vector<std::string> m_vecPattern;
@@ -49,10 +45,9 @@ private:
 	int                      m_nPatternIndex;
 
 
-	bool ConstructThompsonNFA(std::string strRegEx);
+	bool ConstructThompsonNFA();
 	void PushOnCharacterStack(char chInput);
 	bool PopTable(Table  &NFATable);
-	bool EvalMetaChar(char);
 	bool Concatenate();
 	bool Closure();
 	bool ClosureOptional();
@@ -76,10 +71,11 @@ private:
 	int PrePreprocessConcatenation();
 	int PreProcessOr();
 	int PreProcess();
-	void PartitionStates (Table &MinStatesDFA, Table &MinEndStatesDFA);
 	void MinimizeDFA ();
 
 	void PrintTable(Table &table);
+
+	void SaveNFAGraph();
 	
 protected:
 };

@@ -33,6 +33,8 @@ public:
 	bool IsDeadEnd();
 	RegExState& operator=(const RegExState& other);
 	bool operator==(const RegExState& other);
+
+	std::string getStringID();
 protected:
 };
 #endif
