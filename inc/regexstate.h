@@ -28,7 +28,7 @@ public:
 	void AddTransition(char inputCh, RegExState *pState);
 	void RemoveTransition(RegExState* pState);
 	void GetTransition(char inputCh, Table &States);
-	std::set<RegExState*>& RegExState::GetNFAState();
+	std::set<RegExState*>& GetNFAState();
 
 	bool IsDeadEnd();
 	RegExState& operator=(const RegExState& other);
