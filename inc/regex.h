@@ -23,7 +23,6 @@
 #ifndef _REG_EX_H_
 #define _REG_EX_H_
 
-//#include <deque>
 #include <stack>
 #include <set>
 #include <list>
@@ -56,16 +55,10 @@ private:
 	std::stack<char>         m_ExpressionStack;
 	std::set<char>           m_InputSet;
 	std::string              m_strText;
-	std::vector<int>         m_vecPos;
-	std::vector<std::string> m_vecPattern;
-	std::vector<std::string> m_FoundPatterns;
-	std::vector<int>         m_FoundPatternPositions;
 	std::string              m_PostStrRegEx;
 	char*                    m_InfixRegEx;
 	char                     m_CurPreProcChar;
 	int                      m_nNextStateID;
-	int                      m_nPatternIndex;
-
 
 	bool ConstructThompsonNFA();
 	void PushOnCharacterStack(char chInput);
@@ -76,7 +69,6 @@ private:
 	bool ClosurePlus();
 	bool Or();
 	bool IsMetaChar(char inputCh); 
-	bool presedence (char LeftOperator, char RightOperator);
 	bool IsInput(char inputCh);
 	bool IsLeftParan(char inputCh); 
 	bool IsRightParan(char inputCh); 
@@ -91,13 +83,11 @@ private:
 	int PreProcessClosure();
 	int PrePreprocessConcatenation();
 	int PreProcessOr();
-	int PreProcess();
+	std::string PreProcessBracket( std::string strRegEx);
 	void MinimizeDFA ();
 
 	void PrintTable(Table &table);
 
-	void SaveNFAGraph();
-	
 protected:
 };
 #endif

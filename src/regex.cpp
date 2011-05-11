@@ -324,9 +324,41 @@ void RegEx::ReduceDFA() {
 void RegEx::MinimizeDFA () {
 }
 
+std::string RegEx::PreProcessBracket( std::string strRegEx) {
+	std::string::size_type startPos, endPos;
+	std::string ReplacedStrRegEx;
+
+	startPos = strRegEx.find_first_of("[");
+	endPos   = strRegEx.find_first_of("]");
+
+	if ( startPos == std::string::npos || endPos == std::string::npos )
+		return strRegEx;
+
+	ReplacedStrRegEx += strRegEx.substr( 0, startPos );
+	ReplacedStrRegEx.push_back('(');
+	std::string result = strRegEx.substr( startPos + 1, endPos - startPos - 1);
+	char first = result[0];
+	char last  = result[result.size() - 1 ];
+	while ( first != last ) {
+		ReplacedStrRegEx.push_back(first);
+		ReplacedStrRegEx += "|";
+		first++;
+	}
+	ReplacedStrRegEx.push_back(first);
+	ReplacedStrRegEx += ")";
+	ReplacedStrRegEx += strRegEx.substr( endPos + 1, strRegEx.size() - endPos );
+	return ReplacedStrRegEx;
+}
+
 bool RegEx::Compile(std::string strRegEx) {
+
+	while ( strRegEx.find( "[" ) != std::string::npos ) {
+		strRegEx = PreProcessBracket(strRegEx);
+	}
+
 	m_InfixRegEx = const_cast<char*>(strRegEx.c_str());
 	CleanUp();
+	
 	if(!ConstructThompsonNFA())
 		return false;	
 

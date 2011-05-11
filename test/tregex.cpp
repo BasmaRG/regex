@@ -81,5 +81,18 @@ int main( int argc, char **argv ) {
 	assert ( true == re.Match("ababb"));
 	assert ( true == re.Match("aababb"));
 
+	re.Compile("ab[0-9]");
+	assert ( true == re.Match("ab0"));
+	assert ( true == re.Match("ab1"));
+	assert ( true == re.Match("ab2"));
+	assert ( true == re.Match("ab3"));
+	assert ( true == re.Match("ab4"));
+	assert ( true == re.Match("ab5"));
+	assert ( true == re.Match("ab6"));
+	assert ( true == re.Match("ab7"));
+	assert ( true == re.Match("ab8"));
+	assert ( true == re.Match("ab9"));
+	assert ( true == re.Match("ab199"));
+
 	return 0;
 }
