@@ -23,7 +23,7 @@ public:
 	RegExState(std::set<RegExState*> NFAState, int nID);
 	RegExState(const RegExState &other);
 
-	virtual ~RegExState() {};
+	virtual ~RegExState();
 
 	void AddTransition(char inputCh, RegExState *pState);
 	void RemoveTransition(RegExState* pState);

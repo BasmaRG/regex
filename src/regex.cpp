@@ -35,11 +35,12 @@ bool RegEx::IsLeftParan(char inputCh)  { return(inputCh == OPEN_PAREN);  }
 bool RegEx::IsRightParan(char inputCh) { return(inputCh == CLOSE_PAREN); }
 
 void RegEx::CleanUp() {
-	for(int i=0; i < (int)m_NFATable.size(); ++i)
+	for(int i = 0; i < (int)m_NFATable.size(); ++i) {
 		delete m_NFATable[i];
+	}
 	m_NFATable.clear();
 
-	for(int i=0; i < (int)m_DFATable.size(); ++i)
+	for(int i = 0; i < (int)m_DFATable.size(); ++i)
 		delete m_DFATable[i];
 	m_DFATable.clear();
 
@@ -312,7 +313,6 @@ bool RegEx::Compile(std::string strRegEx) {
 	
 	ConvertNFAtoDFA();
 	MinimizeDFA();
-	PrintTable(m_DFATable);
 	return true;
 }
 

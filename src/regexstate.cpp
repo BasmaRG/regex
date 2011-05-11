@@ -1,6 +1,11 @@
 #include <sstream>
 #include "regexstate.h"
 
+RegExState::~RegExState() {
+	m_NFAStates.clear();
+	m_Transition.clear();
+}
+
 RegExState::RegExState(std::set<RegExState*> NFAState, int nID) {
 	m_NFAStates = NFAState;
 	m_nStateID = nID;
