@@ -94,5 +94,13 @@ int main( int argc, char **argv ) {
 	assert ( true == re.Match("ab9"));
 	assert ( true == re.Match("ab199"));
 
+	re.Compile("XYZ[aeiou]");
+	assert ( true == re.Match("XYZa"));
+	assert ( true == re.Match("XYZe"));
+	assert ( true == re.Match("XYZi"));
+	assert ( true == re.Match("XYZo"));
+	assert ( true == re.Match("XYZu"));
+	assert ( false == re.Match("XYZb"));
+
 	return 0;
 }

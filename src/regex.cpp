@@ -325,11 +325,12 @@ void RegEx::MinimizeDFA () {
 }
 
 std::string RegEx::PreProcessBracket( std::string strRegEx) {
-	std::string::size_type startPos, endPos;
+	std::string::size_type startPos, endPos, separatorPos;
 	std::string ReplacedStrRegEx;
 
 	startPos = strRegEx.find_first_of("[");
 	endPos   = strRegEx.find_first_of("]");
+	separatorPos = strRegEx.find_first_of("-");
 
 	if ( startPos == std::string::npos || endPos == std::string::npos )
 		return strRegEx;
@@ -339,14 +340,26 @@ std::string RegEx::PreProcessBracket( std::string strRegEx) {
 	std::string result = strRegEx.substr( startPos + 1, endPos - startPos - 1);
 	char first = result[0];
 	char last  = result[result.size() - 1 ];
-	while ( first != last ) {
-		ReplacedStrRegEx.push_back(first);
-		ReplacedStrRegEx += "|";
-		first++;
+
+	if ( separatorPos != std::string::npos ) {		
+		while ( first != last ) {
+			ReplacedStrRegEx.push_back(first);
+			ReplacedStrRegEx += "|";
+			first++;
+		}
+		ReplacedStrRegEx.push_back(first);				
+	} else {
+		startPos++;
+		while ( startPos != endPos - 1) {
+			ReplacedStrRegEx.push_back(strRegEx[startPos]);
+			ReplacedStrRegEx += "|";
+			startPos++;
+		}
+		ReplacedStrRegEx.push_back(strRegEx[endPos - 1]);
 	}
-	ReplacedStrRegEx.push_back(first);
-	ReplacedStrRegEx += ")";
 	ReplacedStrRegEx += strRegEx.substr( endPos + 1, strRegEx.size() - endPos );
+	ReplacedStrRegEx += ")";
+
 	return ReplacedStrRegEx;
 }
 
